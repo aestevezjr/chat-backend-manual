@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cliente de prueba WebSocket</title>
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7/bundles/stomp.umd.min.js"></script>
+</head>
+<body>
+  <h1>Cliente de prueba — Chat WebSocket</h1>
+
+  <div>
+    <input id="username" type="text" placeholder="Tu nombre" />
+    <button id="connectBtn">Conectar</button>
+  </div>
+
+  <ul id="log"></ul>
+
+  <div>
+    <input id="messageInput" type="text" placeholder="Escribe un mensaje..." disabled />
+    <button id="sendBtn" disabled>Enviar</button>
+  </div>
+
+  <script>
+    const log = (text) => {
+      const li = document.createElement('li')
+      li.textContent = text
+      document.getElementById('log').appendChild(li)
+    }
+
+    let stompClient = null
+
+    document.getElementById('connectBtn').addEventListener('click', () => {
+      const username = document.getElementById('username').value.trim()
+      if (!username) return
+
+      stompClient = new StompJs.Client({
+        brokerURL: 'ws://localhost:8080/ws-chat',
+        onConnect: () => {
+          log('✅ Conectado al servidor')
+          document.getElementById('messageInput').disabled = false
+          document.getElementById('sendBtn').disabled = false
+        },
+        onStompError: (frame) => {
+          log('❌ Error STOMP: ' + frame.headers['message'])
+        },
+        onWebSocketError: () => {
+          log('❌ Error de conexión WebSocket')
+        },
+      })
+
+      stompClient.activate()
+    })
+
+    document.getElementById('sendBtn').addEventListener('click', () => {
+      log('(todavía no hay nada programado para enviar — eso es el Paso 8)')
+    })
+  </script>
+</body>
+</html>
