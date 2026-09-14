@@ -57,6 +57,13 @@
             log(`👥 Conectados: ${users.join(', ')}`)
           })
 
+          stompClient.subscribe('/topic/typing', (frame) => {
+            const typing = JSON.parse(frame.body);
+            if (typing.typing) {
+                log(`✏️ ${typing.username} está escribiendo...`)
+            }
+          })
+
           stompClient.publish({
             destination: '/app/chat.join',
             body: JSON.stringify(username)
@@ -84,6 +91,28 @@
       })
 
       input.value = ''
+
+      stompClient.publish({
+        destination: '/app/chat.typing',
+        body: JSON.stringify({username: currentUsername, typing: false})
+      })
+    })
+
+    let typingTimeout = null;
+
+    document.getElementById('messageInput').addEventListener('input', () => {
+        stompClient.publish({
+            destination: '/app/chat.typing',
+            body: JSON.stringify({username: currentUsername, typing: true})
+        })
+
+        clearTimeout(typingTimeout)
+        typingTimeout = setTimeout(() => {
+            stompClient.publish({
+                destination: '/app/chat.typing',
+                body: JSON.stringify({username: currentUsername, typing: false})
+            })
+        }, 2000)
     })
   </script>
 </body>

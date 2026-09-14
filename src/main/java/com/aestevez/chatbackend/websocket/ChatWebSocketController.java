@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 
 import com.aestevez.chatbackend.dtos.MessageDto;
 import com.aestevez.chatbackend.dtos.MessageType;
+import com.aestevez.chatbackend.dtos.TypingDto;
 import com.aestevez.chatbackend.services.ConnectedUsersService;
 import com.aestevez.chatbackend.services.MessageService;
 
@@ -45,5 +46,11 @@ public class ChatWebSocketController {
         messagingTemplate.convertAndSend("/topic/users", connectedUsersService.getConnectedUsers());
 
         return new MessageDto(null, username, username + " se unió al chat", LocalDateTime.now(), MessageType.JOIN);
+    }
+
+    @MessageMapping ("/chat.typing")
+    @SendTo ("/topic/typing")
+    public TypingDto typing(TypingDto typingDto) {
+        return typingDto;
     }
 }

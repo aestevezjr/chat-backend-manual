@@ -10,6 +10,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import com.aestevez.chatbackend.dtos.MessageDto;
 import com.aestevez.chatbackend.dtos.MessageType;
+import com.aestevez.chatbackend.dtos.TypingDto;
 import com.aestevez.chatbackend.services.ConnectedUsersService;
 
 @Component 
@@ -36,5 +37,6 @@ public class WebSocketEventListener {
 
         MessageDto  leaveMessage = new MessageDto(null, username, username + " se desconectó del chat", LocalDateTime.now(), MessageType.LEAVE);
         messagingTemplate.convertAndSend("/topic/messages", leaveMessage);
+        messagingTemplate.convertAndSend("/topic/typing", new TypingDto(username, false));
     }
 }
