@@ -28,10 +28,12 @@
     }
 
     let stompClient = null
+    let currentUsername = ''
 
     document.getElementById('connectBtn').addEventListener('click', () => {
       const username = document.getElementById('username').value.trim()
       if (!username) return
+      currentUsername = username
 
       stompClient = new StompJs.Client({
         brokerURL: 'ws://localhost:8080/ws-chat',
@@ -39,6 +41,11 @@
           log('✅ Conectado al servidor')
           document.getElementById('messageInput').disabled = false
           document.getElementById('sendBtn').disabled = false
+
+          stompClient.subscribe('/topic/messages', (frame) => {
+            const msg = JSON.parse(frame.body)
+            log(`💬 ${msg.username}: ${msg.content}`)
+          })
         },
         onStompError: (frame) => {
           log('❌ Error STOMP: ' + frame.headers['message'])
@@ -52,7 +59,16 @@
     })
 
     document.getElementById('sendBtn').addEventListener('click', () => {
-      log('(todavía no hay nada programado para enviar — eso es el Paso 8)')
+      const input = document.getElementById('messageInput')
+      const content = input.value.trim()
+      if (!content) return
+
+      stompClient.publish({
+        destination: '/app/chat.send',
+        body: JSON.stringify({username: currentUsername, content})
+      })
+
+      input.value = ''
     })
   </script>
 </body>
