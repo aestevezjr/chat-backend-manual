@@ -44,7 +44,22 @@
 
           stompClient.subscribe('/topic/messages', (frame) => {
             const msg = JSON.parse(frame.body)
-            log(`💬 ${msg.username}: ${msg.content}`)
+
+            if (msg.type === 'CHAT') {
+                log(`💬 ${msg.username}: ${msg.content}`);
+            } else {
+                log(`🔔 ${msg.content}`)
+            }
+          })
+
+          stompClient.subscribe('/topic/users', (frame) => {
+            const users = JSON.parse(frame.body)
+            log(`👥 Conectados: ${users.join(', ')}`)
+          })
+
+          stompClient.publish({
+            destination: '/app/chat.join',
+            body: JSON.stringify(username)
           })
         },
         onStompError: (frame) => {
