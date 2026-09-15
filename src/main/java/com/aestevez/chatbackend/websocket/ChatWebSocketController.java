@@ -2,9 +2,13 @@ package com.aestevez.chatbackend.websocket;
 
 import java.time.LocalDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
@@ -19,6 +23,8 @@ import jakarta.validation.Valid;
 
 @Controller 
 public class ChatWebSocketController {
+
+    private static final Logger log = LoggerFactory.getLogger(ChatWebSocketController.class);
     
     private final MessageService messageService;
     private final ConnectedUsersService connectedUsersService;
@@ -52,5 +58,10 @@ public class ChatWebSocketController {
     @SendTo ("/topic/typing")
     public TypingDto typing(TypingDto typingDto) {
         return typingDto;
+    }
+
+    @MessageExceptionHandler(MethodArgumentNotValidException.class)
+    public void handleValidationError(MethodArgumentNotValidException exception) {
+        log.warn("Mensaje inválido recibido y descartado: {}", exception.getMessage());
     }
 }
