@@ -13,6 +13,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import com.aestevez.chatbackend.dtos.JoinDto;
 import com.aestevez.chatbackend.dtos.MessageDto;
 import com.aestevez.chatbackend.dtos.MessageType;
 import com.aestevez.chatbackend.dtos.TypingDto;
@@ -46,12 +47,12 @@ public class ChatWebSocketController {
 
     @MessageMapping ("/chat.join")
     @SendTo ("/topic/messages")
-    public MessageDto joinChat(@Payload String username, SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("username", username);
-        connectedUsersService.addUser(username);
+    public MessageDto joinChat(@Payload JoinDto joinDto, SimpMessageHeaderAccessor headerAccessor) {
+        headerAccessor.getSessionAttributes().put("username", joinDto.username());
+        connectedUsersService.addUser(joinDto.username());
         messagingTemplate.convertAndSend("/topic/users", connectedUsersService.getConnectedUsers());
 
-        return new MessageDto(null, username, username + " se unió al chat", LocalDateTime.now(), MessageType.JOIN);
+        return new MessageDto(null, joinDto.username(), joinDto.username() + " se unió al chat", LocalDateTime.now(), MessageType.JOIN);
     }
 
     @MessageMapping ("/chat.typing")
